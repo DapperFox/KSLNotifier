@@ -1,0 +1,18 @@
+{
+	"manifest_version": 2,
+	"name": "KSL Classifieds Notifier",
+	"version": "0.4",
+	"icons": {
+		"128" : "kslicon.png"
+		},
+	"description": "Notifies you when items have been posted on KSL classifieds",
+	"permissions": ["storage","notifications","http://www.ksl.com/resources/classifieds/rss_.xml"],
+	"browser_action": {
+		"default_icon": "kslicon.png",
+		"default_popup": "kslalert.html"
+	},
+	"background": {
+		"page": "background.html"
+		},
+	"options_page": "options.html"
+}
