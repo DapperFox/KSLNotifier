@@ -9,7 +9,8 @@
 </head>
 <body>
 	<div class="wrapper">
-	<h1>Please Select a Category</h1>
+	<h1>KSL Classifieds Notifier</h1>
+	<h2>Please Select a Category</h2>
 <select name="category" id="category" class="primary">
 	<option value="Select One">Select One...</option>
 	<option value="Announcements">Announcements</option>
@@ -53,8 +54,12 @@
 <select name="petslivestock" id="PetsLivestock" class="secondary"></select>
 <select name="recreationalvehicles" id="RecreationalVehicles" class="secondary"></select>
 <select name="toys" id="Toys" class="secondary"></select>
+<div class="filter-input">
+	<label for="filter">Filter Term:</label>
+	<input type="text" name="filter" id="FilterTerm" placeholder="Input term..." />
+</div>
 <!-- Save Button -->
-<button id="save">Save</button>
+<button id="Save">Save</button>
 </div>
 <script src="js/ksl_categories.js"></script>
 <script src="js/shared.js"></script>

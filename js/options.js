@@ -6,7 +6,11 @@ var sharedFunctions = window.sharedFunctions || {};
 	namespace.saveSelection = function() {
 		var primary = $('#category').val();
 		var secondary = $('#'+primary).val();
-		chrome.storage.local.set({'selectedCategory': primary + ','+secondary});
+		var filter = $('#FilterTerm').val();
+		if(filter !== '') {
+			chrome.storage.local.set({ 'filterTerm': filter });
+		}
+		chrome.storage.local.set({ 'selectedCategory': primary + ','+secondary });
 		sharedFunctions.startNotifications();
 	};
 
@@ -32,6 +36,6 @@ var sharedFunctions = window.sharedFunctions || {};
 			//	Inserts the categories into the dropdown
 			namespace.insertSubCategories($(this).val());
 			});
-		$('#save').click(namespace.saveSelection);
+		$('#Save').click(namespace.saveSelection);
 	});
 })(options);
