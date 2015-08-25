@@ -1,35 +1,45 @@
-var options = {};
+var options = window.options || {};
+var sharedFunctions = window.sharedFunctions || {};
+(function (namespace) {
+  //  Gets the values in the dropdowns and sets them to local storage.
+  //  Also recalls shared.startNotifications so that the notifications will be updated instantly.
+  namespace.saveSelection = function() {
+    var primary = $('#category').val();
+    var secondary = $('#'+primary).val();
+    var filter = $('#FilterTerm').val();
 
-//	Gets the values in the dropdowns and sets them to local storage.
-//	Also recalls shared.startNotifications so that the notifications will be updated instantly.
-options.saveSelection = function() {
-	var primary = $('#category').val();
-	var secondary = $('#'+primary).val();
-	chrome.storage.local.set({'selectedCategory': primary + ','+secondary});
-	shared.startNotifications();
-};
+    chrome.storage.local.set({ 'filterTerm': filter });
+    chrome.storage.local.set({ 'selectedCategory': primary + ','+secondary });
+    sharedFunctions.startNotifications();
+  };
 
-//	Loops through the LookupCategories in ksl_categories and adds them to the dropdown
-//	when a different one is selected.
-options.insertSubCategories = function(select){
-	var output = "";
-	for(var prop in LookupCategories[select])
-	{
-		output += '<option value="' + prop + '">' + prop + '</option>';
-	}
-	$('#'+select).html(output);
-};
+  //  Loops through the LookupCategories in ksl_categories and adds them to the dropdown
+  //  when a different one is selected.
+  namespace.insertSubCategories = function(select){
+    var output = "";
+    for(var prop in LookupCategories[select])
+    {
+      output += '<option value="' + prop + '">' + prop + '</option>';
+    }
+    $('#'+select).html(output);
+  };
 
-//	Shows the dropdown by the id of the category dropdown and hides the rest.
-//	Adds the listener to the save click event.
-$(document).ready(function(){
-	$('#category').change(
-		function(){
-			$('.secondary').hide();
-			var selectedItem = '#' + $(this).val();
-		$(selectedItem).show();
-		//	Inserts the categories into the dropdown
-		options.insertSubCategories($(this).val());
-		});
-	$('#save').click(options.saveSelection);
-});
+  //  Shows the dropdown by the id of the category dropdown and hides the rest.
+  //  Adds the listener to the save click event.
+  $(document).ready(function(){
+    $('#category').change(
+      function(){
+        $('.secondary').hide();
+        var selectedItem = '#' + $(this).val();
+      $(selectedItem).show();
+      //  Inserts the categories into the dropdown
+      namespace.insertSubCategories($(this).val());
+      });
+    chrome.storage.local.get("filterTerm", function(data) {
+      if(data.filterTerm !== undefined) {
+        $('#FilterTerm').val(data.filterTerm);
+      }
+    });
+    $('#Save').click(namespace.saveSelection);
+  });
+})(options);

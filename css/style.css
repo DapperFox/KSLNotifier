@@ -13,7 +13,7 @@ title{
 }
 .title {
 	font-family: 'Open Sans', sans-serif;
-	color: #FF6F69;
+	color: #2487ba;
 	font-size: 1.5em;
 	text-align: center;
 }
@@ -42,7 +42,7 @@ title{
 	text-decoration: none;
 }
 .date{
-	color: #FF6F69;
+	color: #60B4E1;
 }
 #liveInfo a:hover,
 #liveInfo a:focus {
