@@ -7,9 +7,8 @@ var sharedFunctions = window.sharedFunctions || {};
     var primary = $('#category').val();
     var secondary = $('#'+primary).val();
     var filter = $('#FilterTerm').val();
-    if(filter !== '') {
-      chrome.storage.local.set({ 'filterTerm': filter });
-    }
+
+    chrome.storage.local.set({ 'filterTerm': filter });
     chrome.storage.local.set({ 'selectedCategory': primary + ','+secondary });
     sharedFunctions.startNotifications();
   };
@@ -36,6 +35,11 @@ var sharedFunctions = window.sharedFunctions || {};
       //  Inserts the categories into the dropdown
       namespace.insertSubCategories($(this).val());
       });
+    chrome.storage.local.get("filterTerm", function(data) {
+      if(data.filterTerm !== undefined) {
+        $('#FilterTerm').val(data.filterTerm);
+      }
+    });
     $('#Save').click(namespace.saveSelection);
   });
 })(options);

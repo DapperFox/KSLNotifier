@@ -11,7 +11,7 @@ var sharedFunctions = window.sharedFunctions || {};
   var getCategoryHandler = function(storage){
     selectedCategory = storage.selectedCategory;
     //  Gets the info from the site once the seleted category has been found
-    this.getInfo();
+    getInfo();
   };
 
   //  Runs an ajax request depending on the selected category.
@@ -25,13 +25,21 @@ var sharedFunctions = window.sharedFunctions || {};
         var $xml = $(data);
         var $guid = $xml.find('item guid');
           //  Checks if the most recent item is the same as the last notified item
-          if(localStorage.guid != $guid.eq(0).text()) {
+          var storedTerm;
+          chrome.storage.local.get("filterTerm", function(data) {
+            storedTerm = data.filterTerm;
+          });
+
+          if(localStorage.guid !== $guid.eq(0).text()) {
             localStorage.guid = $guid.eq(0).text();
             var $title = $xml.find('item title');
             var $time = $xml.find('item pubDate');
             var $desc = $xml.find('item description');
             var $links = $xml.find('item link');
-            namespace.notify($title.eq(0).text(), $desc.eq(0).text(), $time.eq(0).text(), $links.eq(0).text());
+            var title = $title.eq(0).text();
+            if(storedTerm === "" || title.toLowerCase().indexOf(storedTerm.toLowerCase()) !== -1) {
+              namespace.notify($title.eq(0).text(), $desc.eq(0).text(), $time.eq(0).text(), $links.eq(0).text());
+            }
           }
         }
         });
@@ -52,18 +60,19 @@ var sharedFunctions = window.sharedFunctions || {};
     var idKey = 'id' + localStorage.count;
     //  linkIdentifier is set here to create links on notifications
     var linkIdentifier = {
-        identifier: [idKey, link]
-      };
-      if(localStorage.storageArray) {
-        var arrayStore = JSON.parse(localStorage.storageArray);
-        arrayStore.push(linkIdentifier);
-        localStorage.storageArray = JSON.stringify(arrayStore);
-      }
-      else {
-        var newStore = [];
-        newStore.push(linkIdentifier);
-        localStorage.storageArray = JSON.stringify(newStore);
-      }
+      identifier: [idKey, link]
+    }
+
+    if(localStorage.storageArray) {
+      var arrayStore = JSON.parse(localStorage.storageArray);
+      arrayStore.push(linkIdentifier);
+      localStorage.storageArray = JSON.stringify(arrayStore);
+    }
+    else {
+      var newStore = [];
+      newStore.push(linkIdentifier);
+      localStorage.storageArray = JSON.stringify(newStore);
+    }
     //  Shows the notification
     chrome.notifications.create(idKey, options, namespace.logCallback);
     localStorage.count++;
@@ -72,11 +81,18 @@ var sharedFunctions = window.sharedFunctions || {};
   //  The handler for onclick method of the notifications. Set in background.js
   namespace.notificationId = function(id){
     var linkArray = JSON.parse(localStorage.storageArray);
-    for(var i = 0; i < linkArray.length; i++) {
-      if(linkArray[i].identifier[0] === id) {
-        chrome.tabs.create({url: linkArray[i].identifier[1], active: true});
-      }
+    var found = linkArray.filter(function(link) {
+      return link.identifier[0] === id;
+    });
+    debugger;
+    if(found) {
+      chrome.tabs.create({ url: found.identifier[1], active: true });
     }
+    // for(var i = 0; i < linkArray.length; i++) {
+    //   if(linkArray[i].identifier[0] === id) {
+    //     chrome.tabs.create({url: linkArray[i].identifier[1], active: true});
+    //   }
+    // }
   };
 
   //  Need this function, gets called when a notification is shown.
