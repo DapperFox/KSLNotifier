@@ -14,6 +14,24 @@ var sharedFunctions = window.sharedFunctions || {};
     getInfo();
   };
 
+  namespace.clearFeed = function () {
+    localStorage.storageArray = [];
+    localStorage.lastDate = new Date().getTime();
+  };
+
+
+  var shouldAlertWithTitle = function (title, terms) {
+    title = title.toLowerCase();
+    var termsArray = terms.toLowerCase().split(" ");
+    for (var i = 0; i < termsArray.length; i++) {
+      var term = termsArray[i];
+      if (term && title.indexOf(term) === -1) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   //  Runs an ajax request depending on the selected category.
   var getInfo = function(){
     //  Gets the category selected in the options pane and sets it to the url
@@ -21,31 +39,38 @@ var sharedFunctions = window.sharedFunctions || {};
       var splitCategory = selectedCategory.split(",");
       var categoryUrl = LookupCategories[splitCategory[0]][splitCategory[1]];
       //  Ajax query to ksl to get information
-      $.ajax({url: 'http://www.ksl.com/resources/classifieds/rss_.xml'+categoryUrl, success: function(data){
-        var $xml = $(data);
-        var $guid = $xml.find('item guid');
-          //  Checks if the most recent item is the same as the last notified item
-          var storedTerm;
-          chrome.storage.local.get("filterTerm", function(data) {
-            storedTerm = data.filterTerm;
-          });
-
-          if(localStorage.guid !== $guid.eq(0).text()) {
-            localStorage.guid = $guid.eq(0).text();
-            var $title = $xml.find('item title');
-            var $time = $xml.find('item pubDate');
-            var $desc = $xml.find('item description');
-            var $links = $xml.find('item link');
-            var title = $title.eq(0).text();
-            if(storedTerm === "" || title.toLowerCase().indexOf(storedTerm.toLowerCase()) !== -1) {
-              namespace.notify($title.eq(0).text(), $desc.eq(0).text(), $time.eq(0).text(), $links.eq(0).text());
-            }
-          }
-        }
-        });
+      chrome.storage.local.get("filterTerm", function(data) {
+        performRequestForFilter(categoryUrl, data.filterTerm || "");
+      }); 
     } else {
       chrome.tabs.create({url: chrome.extension.getURL('options.html'), selected: true});
     }
+  };
+
+  var performRequestForFilter = function (categoryUrl, filterText) {
+    console.log("performRequestForFilter", categoryUrl, filterText);
+    filterText = (filterText || "").toLowerCase();
+    $.ajax({url: 'http://www.ksl.com/resources/classifieds/rss_.xml'+categoryUrl, success: function(data){
+      var $xml = $(data);
+      var $guid = $xml.find('item guid');
+        //  Checks if the most recent item is the same as the last notified item
+        if (localStorage.guid !== $guid.eq(0).text()) {
+          localStorage.guid = $guid.eq(0).text();
+          var $title = $xml.find('item title');
+          var $time = $xml.find('item pubDate');
+          var $desc = $xml.find('item description');
+          var $links = $xml.find('item link');
+          var title = $title.eq(0).text() || "";
+          var notify = false;
+          if (!filterText || shouldAlertWithTitle(title, filterText)) {
+            notify = true;
+          }
+          if (notify) {
+            namespace.notify($title.eq(0).text(), $desc.eq(0).text(), $time.eq(0).text(), $links.eq(0).text());
+          }
+        }
+      }
+    });
   };
 
   //  Function to display the notification if something is new
