@@ -7,7 +7,6 @@ var kslExtension = window.kslExtension || {};
     var $link = kslItemsArray[1];
     var $description = kslItemsArray[2];
     var $date = kslItemsArray[3];
-    console.log($date);
     for(var i = 0; i < $title.length; i++)
     {
       $liveInfo.append('<a href="'+$link[i]+'">'+$title[i]+'<div class="date"> '+ moment($date[i].trim()).format('DD, MMM h:mm a') +'</div></a>');
@@ -92,7 +91,6 @@ var kslExtension = window.kslExtension || {};
   };
   $(document).ready(function(){
     //  Gets the category from storage set in the options
-    chrome.storage.local.get(
-      'selectedCategory', namespace.storageHandle);
+    chrome.storage.local.get('selectedCategory', namespace.storageHandle);
   });
 })(kslExtension); 
